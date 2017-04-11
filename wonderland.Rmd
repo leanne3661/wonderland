@@ -1,0 +1,26 @@
+---
+title: "Alice’s adventures in Wonderland"
+author: "Leanne Fortney"
+date: "April 11, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+library(tidyverse)
+library(stringr)
+library(gutenbergr)
+library(tokenizers)
+library(tidytext)
+library(topicmodels)
+```
+```{r}
+library(dplyr)
+
+gutenberg_metadata %>%
+filter(title == "Alice's Adventures in Wonderland")
+
+Alice <- gutenberg_download(11)
+```
