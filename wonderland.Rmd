@@ -5,26 +5,23 @@ date: "April 11, 2017"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(include = FALSE)
-```
-```{r, echo=FALSE}
+```{r, include=FALSE}
 library(tidyverse)
 library(stringr)
-library(gutenbergr)
 library(tokenizers)
 library(tidytext)
 library(topicmodels)
 library(dplyr)
+library(gutenbergr)
 ```
-```{r, include=FALSE}
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 gutenberg_works(str_detect(author, "Carroll"))
 books <- gutenberg_download(c(11, 12, 13, 620, 651, 19002, 28696, 28885, 29042, 29888, 33582, 35497, 35535, 36308, 38308, 38065, 48630, 48795), meta_fields = "title")
 
 books <- books %>% 
 mutate(words = count_words(text))
 ```
-```{r, include=FALSE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 books
 
 sum(books$words)
@@ -40,13 +37,13 @@ books_tokenized <- books %>%
   select(title, text) %>% 
   unnest_tokens(word, text, token = "words")
 
-  word_counts <- books_tokenized %>% 
-  count(word, sort = TRUE)
+word_counts <- books_tokenized %>% 
+  count(word, sort=TRUE)
 
-  before <- nrow(books_tokenized)
+before <- nrow(books_tokenized)
   
-  words_to_drop <- word_counts %>% 
-  filter(n <= 2 | n >= 8000)
+words_to_drop <- word_counts %>% 
+filter(n <= 2 | n >= 8000)
 
 nrow(words_to_drop) / nrow(word_counts)
 
@@ -75,27 +72,22 @@ plot_words <- function(tidy_df, n = 10) {
 plot_words(books_tokenized, n = 60)
 
 ```
-```{r, echo=FALSE}
-read_doc <- function(id) {
-  out <- books %>% 
-    filter(title == id)
-  cat(out[["text"]])
-}
-read_doc("Alice's Adventures in Wonderland")
-```
-```{r, include=FALSE}
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 alice <- gutenberg_download((11), meta_fields = "title")
 
 alice <- alice %>% 
 mutate(words = count_words(text))
-
+```
+```{r, echo=FALSE}
 alice
 
 sum(alice$words)
 ggplot(alice, aes(x = words)) + 
 geom_histogram(binwidth = 1) +
   labs(title = "Lengths of narratives")
-
+```
+```{r, include=FALSE}
 words <- alice %>%
   unnest_tokens(word, text)
 
