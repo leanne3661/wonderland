@@ -5,7 +5,7 @@ date: "April 11, 2017"
 output: html_document
 ---
 
-```{r, include=FALSE}
+```{r, message=FALSE, warning=FALSE, include=FALSE}
 library(tidyverse)
 library(stringr)
 library(tokenizers)
@@ -15,16 +15,19 @@ library(dplyr)
 library(gutenbergr)
 library(wordVectors)
 ```
-```{r, message=FALSE, warning=FALSE, include=FALSE}
+Lewis Carroll is famous for her books about Alice and her adventures in Wonderland. Taken from the Gutenberg Projects, the following two visualizations display the word count per line within a given text. The second displays the top ten commonly used words, include the use of the numbers 2, 3, 4. 
+
+```{r, include=FALSE}
 gutenberg_works(str_detect(author, "Carroll"))
 books <- gutenberg_download(c(11, 12, 13, 620, 651, 19002, 28696, 28885, 29042, 29888, 33582, 35497, 35535, 36308, 38308, 38065, 48630, 48795), meta_fields = "title")
 
 books <- books %>% 
 mutate(words = count_words(text))
-```
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
 books
 sum(books$words)
+```
+```{r, echo=FALSE}
 ggplot(books, aes(x = words)) +
 geom_histogram(binwidth = 1, 
                   col= "black",
@@ -33,7 +36,7 @@ scale_fill_gradient("Count", low = "blue", high = "red") +
   coord_cartesian(xlim = c(2, 20), ylim = c(2, 10000)) +
   labs(title = "Lengths of narratives")
 ```
-```{r, include=FALSE}
+```{r, message=TRUE, warning=TRUE, include=FALSE}
 words <- books %>%
   unnest_tokens(word, text)
 
@@ -60,7 +63,9 @@ before - after
 after / before
 
 ```
-```{r, echo=FALSE}
+Visualization 2: The Top Ten Words
+
+```{r, echo=FALSE, message=TRUE, warning=TRUE}
 plot_words <- function(tidy_df, n = 20) {
   require(ggplot2)
   require(dplyr)
@@ -73,23 +78,30 @@ plot_words <- function(tidy_df, n = 20) {
     xlab(NULL) +
     coord_flip()
 }
+```
+```{r, echo=FALSE}
 plot_words(books_tokenized, n = 20)
 ```
 
-```{r, message=FALSE, warning=FALSE, include=FALSE}
+
+```{r, include=FALSE}
 alice <- gutenberg_download((11), meta_fields = "title")
 
 alice <- alice %>% 
 mutate(words = count_words(text))
-```
-```{r, echo=FALSE}
-alice
-
 sum(alice$words)
+```
+These are only text within Alice's Adventures in Wonderland.
+```{r, echo=FALSE}
 ggplot(alice, aes(x = words)) + 
-geom_histogram(binwidth = 1) +
+geom_histogram(binwidth = 1, 
+                  col= "black",
+               aes(fill=..count..)) +
+scale_fill_gradient("count", low = "yellow", high = "red") +
+  coord_cartesian(xlim = c(2, 20), ylim = c(2, 500)) +
   labs(title = "Lengths of narratives")
 ```
+
 ```{r, include=FALSE}
 words <- alice %>%
   unnest_tokens(word, text)
@@ -129,6 +141,8 @@ plot_words <- function(tidy_df, n = 10) {
     xlab(NULL) +
     coord_flip()
 }
-plot_words(alice_tokenized, n = 60)
+```
+```{r, echo=FALSE}
+plot_words(alice_tokenized, n = 10)
 
 ```
