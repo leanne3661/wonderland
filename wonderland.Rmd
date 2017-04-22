@@ -23,10 +23,10 @@ mutate(words = count_words(text))
 ```
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 books
-
 sum(books$words)
 ggplot(books, aes(x = words)) + 
 geom_histogram(binwidth = 1) +
+  coord_cartesian(xlim = c(2, 20), ylim = c(2, 10000)) +
   labs(title = "Lengths of narratives")
 ```
 ```{r, include=FALSE}
@@ -43,7 +43,7 @@ word_counts <- books_tokenized %>%
 before <- nrow(books_tokenized)
   
 words_to_drop <- word_counts %>% 
-filter(n <= 2 | n >= 8000)
+filter(n <= 2 | n >= 1500)
 
 nrow(words_to_drop) / nrow(word_counts)
 
@@ -70,7 +70,6 @@ plot_words <- function(tidy_df, n = 10) {
     coord_flip()
 }
 plot_words(books_tokenized, n = 60)
-
 ```
 
 ```{r, message=FALSE, warning=FALSE, include=FALSE}
@@ -101,7 +100,7 @@ alice_tokenized <- alice %>%
   before <- nrow(alice_tokenized)
   
   words_to_drop <- word_counts %>% 
-  filter(n <= 2 | n >= 8000)
+  filter(n <= 2 | n >= 1500)
 
 nrow(words_to_drop) / nrow(word_counts)
 
