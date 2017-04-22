@@ -13,6 +13,7 @@ library(tidytext)
 library(topicmodels)
 library(dplyr)
 library(gutenbergr)
+library(wordVectors)
 ```
 ```{r, message=FALSE, warning=FALSE, include=FALSE}
 gutenberg_works(str_detect(author, "Carroll"))
@@ -24,8 +25,11 @@ mutate(words = count_words(text))
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 books
 sum(books$words)
-ggplot(books, aes(x = words)) + 
-geom_histogram(binwidth = 1) +
+ggplot(books, aes(x = words)) +
+geom_histogram(binwidth = 1, 
+                  col= "black",
+               aes(fill=..count..)) +
+scale_fill_gradient("Count", low = "blue", high = "red") +
   coord_cartesian(xlim = c(2, 20), ylim = c(2, 10000)) +
   labs(title = "Lengths of narratives")
 ```
@@ -57,7 +61,7 @@ after / before
 
 ```
 ```{r, echo=FALSE}
-plot_words <- function(tidy_df, n = 10) {
+plot_words <- function(tidy_df, n = 20) {
   require(ggplot2)
   require(dplyr)
   tidy_df %>%
@@ -69,7 +73,7 @@ plot_words <- function(tidy_df, n = 10) {
     xlab(NULL) +
     coord_flip()
 }
-plot_words(books_tokenized, n = 60)
+plot_words(books_tokenized, n = 20)
 ```
 
 ```{r, message=FALSE, warning=FALSE, include=FALSE}
