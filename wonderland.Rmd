@@ -13,7 +13,7 @@ library(tidytext)
 library(topicmodels)
 library(dplyr)
 library(gutenbergr)
-library(wordVectors)
+library(textreuse)
 ```
 Lewis Carroll is famous for her books about Alice and her adventures in Wonderland. Taken from the Gutenberg Projects, the following two visualizations display the word count per line within a given text. The second displays the top ten commonly used words, include the use of the numbers 2, 3, 4. 
 
@@ -144,5 +144,36 @@ plot_words <- function(tidy_df, n = 10) {
 ```
 ```{r, echo=FALSE}
 plot_words(alice_tokenized, n = 10)
-
 ```
+```{r, include=FALSE}
+
+minhash <- minhash_generator(n = 5, seed = 15)
+lsh_threshold(25, 5)
+
+
+corpus <- TextReuseCorpus(dir = "Carroll",
+                          tokenizer = tokenizers::tokenize_ngrams,
+                          n = 5, simplify = TRUE,
+                          minhash_func = minhash, keep_tokens = TRUE)
+
+doc_alice <- corpus[["11"]]
+doc_looking_glass <- corpus[["12"]]
+doc_alice_underground <- corpus[["19002"]]
+
+content(doc_alice)
+content(doc_looking_glass)
+
+jaccard_similarity(doc_alice, doc_looking_glass)
+jaccard_similarity(doc_alice, doc_alice_underground)
+
+cf_sample <- pairwise_compare(sample(corpus, 3), jaccard_similarity)
+cf_sample %>% round(2)
+
+buckets <- lsh(corpus, bands = 5)
+```
+```{r}
+align_local(doc_alice, doc_looking_glass)
+align_local(corpus[["11"]], corpus[["19002"]])
+```
+
+
