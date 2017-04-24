@@ -147,7 +147,7 @@ plot_words(alice_tokenized, n = 10)
 ```
 
 We can also compare "Alice's Adventures in Wonderland" with "Through the Looking Glass" 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
 minhash <- minhash_generator(n = 5, seed = 15)
 lsh_threshold(25, 5)
@@ -159,10 +159,6 @@ corpus <- TextReuseCorpus(dir = "Carroll",
 
 doc_alice <- corpus[["11"]]
 doc_looking_glass <- corpus[["12"]]
-
-
-content(doc_alice)
-content(doc_looking_glass)
 
 jaccard_similarity(doc_alice, doc_looking_glass)
 
