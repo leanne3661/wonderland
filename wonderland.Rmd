@@ -14,12 +14,13 @@ library(topicmodels)
 library(dplyr)
 library(gutenbergr)
 library(textreuse)
+library(ggplot2)
 ```
 Lewis Carroll is famous for her books about Alice and her adventures in Wonderland. Taken from the Gutenberg Projects, the following two visualizations display the word count per line within a given text. The second displays the top ten commonly used words, include the use of the numbers 2, 3, 4. 
 
 ```{r, include=FALSE}
 gutenberg_works(str_detect(author, "Carroll"))
-books <- gutenberg_download(c(11, 12, 13, 620, 651, 19002, 28696, 28885, 29042, 29888, 33582, 35497, 35535, 36308, 38308, 38065, 48630, 48795), meta_fields = "title")
+books <- gutenberg_download(c(11, 12, 13, 620, 651, 4763, 29042, 33582, 35497, 35535, 36308, 38065), meta_fields = "title")
 
 books <- books %>% 
 mutate(words = count_words(text))
@@ -33,7 +34,7 @@ geom_histogram(binwidth = 1,
                   col= "black",
                aes(fill=..count..)) +
 scale_fill_gradient("Count", low = "blue", high = "red") +
-  coord_cartesian(xlim = c(2, 20), ylim = c(2, 10000)) +
+  coord_cartesian(xlim = c(2, 20), ylim = c(1, 3000)) +
   labs(title = "Lengths of narratives")
 ```
 ```{r, message=TRUE, warning=TRUE, include=FALSE}
@@ -64,23 +65,21 @@ after / before
 
 ```
 Visualization 2: The Top Ten Words
+Based on the text provided by the Gutenburg Project I was able to analyze and plot the top ten most popular words from her collection of writings. Not very shocking, but the top three come from her most popular books "Alice's Adventures in Wonderland" and "Sylvie and Bruno". What does suprise me is the quantities in which numbers were used in the books. This could be errors from the transcriptions of the books into the Gutenburg Project or it could be the usuage of footnotes, though this wouldn't account for the use of the number 0.
 
 ```{r, echo=FALSE, message=TRUE, warning=TRUE}
-plot_words <- function(tidy_df, n = 20) {
-  require(ggplot2)
-  require(dplyr)
+plot_words <- function(tidy_df, n = 10) {
   tidy_df %>%
     count(word, sort = TRUE) %>%
     top_n(n = n, n) %>% 
     mutate(word = reorder(word, n)) %>%
-    ggplot(aes(word, n)) +
+    ggplot(aes(word, n, fill= n))+
     geom_col() +
-    xlab(NULL) +
     coord_flip()
 }
 ```
 ```{r, echo=FALSE}
-plot_words(books_tokenized, n = 20)
+plot_words(books_tokenized, n = 10)
 ```
 
 
@@ -91,7 +90,8 @@ alice <- alice %>%
 mutate(words = count_words(text))
 sum(alice$words)
 ```
-These are only text within Alice's Adventures in Wonderland.
+If we take a closer look at Alice's Adventures in Wonderland, we can observe that the longest sentence consists of 13 words with a total count of 500 words. 
+
 ```{r, echo=FALSE}
 ggplot(alice, aes(x = words)) + 
 geom_histogram(binwidth = 1, 
@@ -99,7 +99,7 @@ geom_histogram(binwidth = 1,
                aes(fill=..count..)) +
 scale_fill_gradient("count", low = "yellow", high = "red") +
   coord_cartesian(xlim = c(2, 20), ylim = c(2, 500)) +
-  labs(title = "Lengths of narratives")
+  labs(title = "Length of Story")
 ```
 
 ```{r, include=FALSE}
@@ -130,26 +130,27 @@ after / before
 ```
 ```{r, echo=FALSE}
 plot_words <- function(tidy_df, n = 10) {
-  require(ggplot2)
-  require(dplyr)
   tidy_df %>%
     count(word, sort = TRUE) %>%
     top_n(n = n, n) %>% 
     mutate(word = reorder(word, n)) %>%
-    ggplot(aes(word, n)) +
+    ggplot(aes(word, n, fill= n)) +
     geom_col() +
     xlab(NULL) +
     coord_flip()
 }
 ```
+If we take a closer look at the word usuage, it is clearly illustrated that the word Alice recieves the most attention throughout the book. Given this is the name of the primary charactor, this is an accuarate assumption to recieving a higher the average result. The second and third highest used words are "time" and "queen". These highlight the overall theme of the story, a race to get home before the queen cuts off her head.  
+
 ```{r, echo=FALSE}
 plot_words(alice_tokenized, n = 10)
 ```
-```{r, include=FALSE}
+
+We can also compare "Alice's Adventures in Wonderland" with "Through the Looking Glass" 
+```{r, echo=FALSE}
 
 minhash <- minhash_generator(n = 5, seed = 15)
 lsh_threshold(25, 5)
-
 
 corpus <- TextReuseCorpus(dir = "Carroll",
                           tokenizer = tokenizers::tokenize_ngrams,
@@ -158,22 +159,21 @@ corpus <- TextReuseCorpus(dir = "Carroll",
 
 doc_alice <- corpus[["11"]]
 doc_looking_glass <- corpus[["12"]]
-doc_alice_underground <- corpus[["19002"]]
+
 
 content(doc_alice)
 content(doc_looking_glass)
 
 jaccard_similarity(doc_alice, doc_looking_glass)
-jaccard_similarity(doc_alice, doc_alice_underground)
 
-cf_sample <- pairwise_compare(sample(corpus, 3), jaccard_similarity)
+
+cf_sample <- pairwise_compare(sample(corpus, 2), jaccard_similarity)
 cf_sample %>% round(2)
 
 buckets <- lsh(corpus, bands = 5)
 ```
-```{r}
+```{r, echo=FALSE}
 align_local(doc_alice, doc_looking_glass)
-align_local(corpus[["11"]], corpus[["19002"]])
 ```
 
 
